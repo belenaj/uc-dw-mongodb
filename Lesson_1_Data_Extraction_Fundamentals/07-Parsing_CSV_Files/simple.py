@@ -30,7 +30,7 @@ def parse_file(datafile):
 
             data.append(d)
             counter += 1
-    print data
+
     return data
 
 
