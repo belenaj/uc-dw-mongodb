@@ -2,7 +2,7 @@
 """
 Your task is as follows:
 - read the provided Excel file
-- find and return the min and max values for the COAST region
+- find and return the min, max and average values for the COAST region
 - find and return the time value for the min and max entries
 - the time values should be returned as Python tuples
 
@@ -44,33 +44,49 @@ def parse_file(datafile):
     # we just want the region COAST, that is column[1] in the excel sheet
     sheet_data = [[sheet.cell_value(r, 1)] for r in range(1, sheet.nrows)]  # 1 to skip header
 
-    print(sheet_data)
-    ### other useful methods:
-    # print "\nROWS, COLUMNS, and CELLS:"
-    # print "Number of rows in the sheet:", 
-    # print sheet.nrows
-    # print "Type of data in cell (row 3, col 2):", 
-    # print sheet.cell_type(3, 2)
-    # print "Value in cell (row 3, col 2):", 
-    # print sheet.cell_value(3, 2)
-    # print "Get a slice of values in column 3, from rows 1-3:"
-    # print sheet.col_values(3, start_rowx=1, end_rowx=4)
+    print('sheet_data:    ' + str(type(sheet_data)))        # sheet_data has 'list' Type
+    print('sheet data[0]: ' + str(type(sheet_data[0])))     # ! each element of sheet_data is also a 'list' of size 1 !
 
-    # print "\nDATES:"
-    # print "Type of data in cell (row 1, col 0):", 
-    # print sheet.cell_type(1, 0)
-    # exceltime = sheet.cell_value(1, 0)
-    # print "Time in Excel format:",
-    # print exceltime
-    # print "Convert time to a Python datetime tuple, from the Excel float:",
-    # print xlrd.xldate_as_tuple(exceltime, 0)
+    # print(sheet_data)  # uncomment to display data
+
+    # to calculate the average, let's create a list of floats
+    float_ls = []
+    for x in sheet_data:
+        float_ls.append(x[0])  # all the lists within the list have only one element (index = 0)
+
+    # getting the average value
+    avgcoast = sum(float_ls) / float(len(float_ls))
+    print 'Average value for COAST: ' + '%.6f' % avgcoast
+
+    # getting min and max values (as float)
+    minvalue = min(sheet_data)[0]
+    maxvalue = max(sheet_data)[0]
+    print 'Min. value: ' + '%.6f' % minvalue
+    print 'Max. value: ' + '%.6f' % maxvalue
+
+    # getting index of min and max values (+1 because we skipped the header)
+    minvalue_idx = sheet_data.index([minvalue]) + 1
+    maxvalue_idx = sheet_data.index([maxvalue]) + 1
+
+    # extract time at index ( ! as float)
+    mintime_cell = sheet.cell_value(minvalue_idx, 0)
+    maxtime_cell = sheet.cell_value(maxvalue_idx, 0)
+
+    print('mintime_cell: ' + str(type(mintime_cell)))  # ! it returns the time as float !
+
+    # print "Convert time to a Python datetime tuple,
+    mintime = xlrd.xldate_as_tuple(mintime_cell, 0)
+    maxtime = xlrd.xldate_as_tuple(maxtime_cell, 0)
+
+    print mintime
+    print maxtime
 
     data = {
-        'maxtime': (0, 0, 0, 0, 0, 0),
-        'maxvalue': 0,
-        'mintime': (0, 0, 0, 0, 0, 0),
-        'minvalue': 0,
-        'avgcoast': 0
+            'maxtime': maxtime,
+            'maxvalue': maxvalue,
+            'mintime': mintime,
+            'minvalue': minvalue,
+            'avgcoast': avgcoast
     }
     return data
 
@@ -82,7 +98,7 @@ def test():
     assert data['maxtime'] == (2013, 8, 13, 17, 0, 0)
     assert round(data['maxvalue'], 10) == round(18779.02551, 10)
 
-    remove_file(datafile)
+    remove_file('{0}.xls'.format(datafile))
 
 
 test()
